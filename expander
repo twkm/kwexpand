@@ -1,0 +1,45 @@
+#!bin/python3
+
+import click
+import json
+
+class keywordList(list):
+    def formatter(self, format):
+        if format == 'json':
+            return json.dumps(self)
+        elif format == 'csv':
+            rstr = ''
+            for kw in self:
+                rstr += '"' + kw + '"\n'
+            return rstr
+        else:
+            rstr = ''
+            for kw in self:
+                rstr += kw + '\n'
+            return rstr
+
+def getExpandedKeywords(seed_string, expand_string):
+
+    seeds = json.loads(seed_string)
+    expands = json.loads(expand_string)
+
+    new_keywords = []
+
+    for seed in seeds:
+        for expand in expands:
+            new_keywords.append( seed + " " + expand )
+
+    return new_keywords
+
+@click.command()
+@click.option('--seed', '-s', required=True, help='JSON array of seed keywords')
+@click.option('--expand', '-x', required=True, help='JSON array of keywords to join to seed(s)')
+@click.option('--format', '-o', default='txt', type=click.Choice(['csv','json','txt']), help='Format of output')
+def expander(seed, expand, format):
+    '''Combine two lists of words to get an expanded set.
+    '''
+    keywords = keywordList(getExpandedKeywords(seed, expand))
+    click.echo(keywords.formatter(format))
+
+if __name__ == '__main__':
+    expander()
